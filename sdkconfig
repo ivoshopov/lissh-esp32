@@ -443,6 +443,12 @@ CONFIG_ESP_ERR_TO_NAME_LOOKUP=y
 # end of ESP-Driver:GPIO Configurations
 
 #
+# ESP-Driver:UART Configurations
+#
+# CONFIG_UART_ISR_IN_IRAM is not set
+# end of ESP-Driver:UART Configurations
+
+#
 # Hardware Settings
 #
 
@@ -532,6 +538,12 @@ CONFIG_XTAL_FREQ=40
 #
 # CONFIG_PM_ENABLE is not set
 # end of Power Management
+
+#
+# ESP Ringbuf
+#
+# CONFIG_RINGBUF_PLACE_FUNCTIONS_INTO_FLASH is not set
+# end of ESP Ringbuf
 
 #
 # ESP System Settings
@@ -976,6 +988,24 @@ CONFIG_SPI_FLASH_SUPPORT_WINBOND_CHIP=y
 
 CONFIG_SPI_FLASH_ENABLE_ENCRYPTED_READ_WRITE=y
 # end of SPI Flash driver
+
+#
+# Virtual file system
+#
+CONFIG_VFS_SUPPORT_IO=y
+CONFIG_VFS_SUPPORT_DIR=y
+CONFIG_VFS_SUPPORT_SELECT=y
+CONFIG_VFS_SUPPRESS_SELECT_DEBUG_OUTPUT=y
+# CONFIG_VFS_SELECT_IN_RAM is not set
+CONFIG_VFS_SUPPORT_TERMIOS=y
+CONFIG_VFS_MAX_COUNT=8
+
+#
+# Host File System I/O (Semihosting)
+#
+CONFIG_VFS_SEMIHOSTFS_MAX_MOUNT_POINTS=1
+# end of Host File System I/O (Semihosting)
+# end of Virtual file system
 # end of Component config
 
 # CONFIG_IDF_EXPERIMENTAL_FEATURES is not set
@@ -1108,4 +1138,7 @@ CONFIG_ESP32_PTHREAD_TASK_NAME_DEFAULT="pthread"
 CONFIG_SPI_FLASH_WRITING_DANGEROUS_REGIONS_ABORTS=y
 # CONFIG_SPI_FLASH_WRITING_DANGEROUS_REGIONS_FAILS is not set
 # CONFIG_SPI_FLASH_WRITING_DANGEROUS_REGIONS_ALLOWED is not set
+CONFIG_SUPPRESS_SELECT_DEBUG_OUTPUT=y
+CONFIG_SUPPORT_TERMIOS=y
+CONFIG_SEMIHOSTFS_MAX_MOUNT_POINTS=1
 # End of deprecated options
