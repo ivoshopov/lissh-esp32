@@ -1,0 +1,3 @@
+[submodule "tinylisp"]
+	path = tinylisp
+	url = https://github.com/ivoshopov/tinylisp.git

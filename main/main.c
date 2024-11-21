@@ -15,6 +15,8 @@
 #include "driver/uart_vfs.h"
 #include "driver/uart.h"
 
+int repl(void);
+
 void app_main(void)
 {
 
@@ -67,6 +69,9 @@ void app_main(void)
 
     printf("Minimum free heap size: %" PRIu32 " bytes\n", esp_get_minimum_free_heap_size());
 
+    printf("Starting lisp REPL\n");
+    fflush(stdout);
+    repl();
 err:
     fflush(stdout);
     /* In order to prevent overload of ESP-IDF monitor on slow machine we can sleep for 3 sec */
