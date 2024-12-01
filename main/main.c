@@ -25,10 +25,6 @@ void app_main(void)
     uint32_t flash_size;
     esp_chip_info(&chip_info);
 
-    if (uart_driver_install(UART_NUM_0, 2 * 1024, 0, 0, NULL, 0) != ESP_OK) {
-        printf("UART driver installation failed");
-	goto err;
-    }
 
     uart_config_t uart_config = {
         .baud_rate = 115200,
@@ -39,14 +35,30 @@ void app_main(void)
         .source_clk = UART_SCLK_DEFAULT,
     };
 
-    if (uart_param_config(UART_NUM_0, &uart_config) != ESP_OK) {
+    if (uart_param_config(UART_NUM_1, &uart_config) != ESP_OK) {
         printf("UART driver configuration failed");
-	goto err;
+        goto err;
     }
+
+    /* Tx: 23
+       Rx: 22 */
+    if (uart_set_pin(UART_NUM_1, 23, 22, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK) {
+    //if (uart_set_pin(UART_NUM_1, 1, 3, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK) {
+        printf("UART pin setup failed");
+        goto err;
+    }
+
+    if (uart_driver_install(UART_NUM_1, 2 * 1024, 0, 0, NULL, 0) != ESP_OK) {
+        printf("UART driver installation failed");
+        goto err;
+    }
+
+    stdout = fopen("/dev/uart/1", "w");
+    stdin = fopen("/dev/uart/1", "r");
 
     /* By default stdin is non blocking UART. Following call switch to blocking
        UART (Standard POSIX behaviour) */
-    uart_vfs_dev_use_driver(0);
+    uart_vfs_dev_use_driver(1);
 
     printf("This is %s chip with %d CPU core(s), %s%s%s%s, ",
            CONFIG_IDF_TARGET,
