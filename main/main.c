@@ -25,6 +25,8 @@ void app_main(void)
     uint32_t flash_size;
     esp_chip_info(&chip_info);
 
+    printf("Hit Ctrl+C to run gdb in ESP-IDF monitor\n");
+    fflush(stdout);
 
     uart_config_t uart_config = {
         .baud_rate = 115200,

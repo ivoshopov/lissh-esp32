@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.16)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
 # TODO: remove vfs. It isn't require from the main but esp_driver_uart require it.
-set(COMPONENTS "main esp_driver_uart vfs")
+set(COMPONENTS "main esp_driver_uart vfs esp_gdbstub")
 
 project(repl-main)
+
