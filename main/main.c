@@ -28,6 +28,7 @@ void app_main(void)
     printf("Hit Ctrl+C to run gdb in ESP-IDF monitor\n");
     fflush(stdout);
 
+#if defined(CONFIG_UART1_AS_STDIO)
     uart_config_t uart_config = {
         .baud_rate = 115200,
         .data_bits = UART_DATA_8_BITS,
@@ -61,6 +62,8 @@ void app_main(void)
     /* By default stdin is non blocking UART. Following call switch to blocking
        UART (Standard POSIX behaviour) */
     uart_vfs_dev_use_driver(1);
+#endif /* CONFIG_UART1_AS_STDIO */
+
 
     printf("This is %s chip with %d CPU core(s), %s%s%s%s, ",
            CONFIG_IDF_TARGET,

@@ -8,7 +8,8 @@ export CFLAGS="-mlongcalls -Wno-frame-address  -fno-builtin-memcpy -fno-builtin-
 export CPPFLAGS="-DESP_PLATFORM -DIDF_VER=\"v5.3\" -DSOC_MMU_PAGE_SIZE=CONFIG_MMU_PAGE_SIZE -DSOC_XTAL_FREQ_MHZ=CONFIG_XTAL_FREQ -D_GLIBCXX_HAVE_POSIX_SEMAPHORE -D_GLIBCXX_USE_POSIX_SEMAPHORE -D_GNU_SOURCE -D_POSIX_READER_WRITER_LOCKS"
 
 cd tinylisp
-sed -i 	-e "s/CONFIG_MAIN=y/# CONFIG_MAIN=y/" \
+sed 	-e "s/CONFIG_MAIN=y/# CONFIG_MAIN=y/" \
 	-e "s/CONFIG_DO_ELF=y/# CONFIG_DO_ELF=y/" \
-	-e "s/# CONFIG_DO_LIB=y/CONFIG_DO_LIB=y/" .config
+	-e "s/# CONFIG_DO_LIB=y/CONFIG_DO_LIB=y/" \
+	-e 's/CONFIG_DEFAULT_PORT="std"/CONFIG_DEFAULT_PORT="uart1"/' < defconfig > .config
 make
