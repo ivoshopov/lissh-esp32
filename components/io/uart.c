@@ -19,27 +19,27 @@ static int uartx_read(uart_port_t uart_num) {
         }
         return data;
 }
-static int uart0_write(const char c) {
+static int uart0_write(struct io_primitive *port, const char c) {
         return uartx_write(UART_NUM_0, c);
 }
 
-static int uart1_write(const char c) {
+static int uart1_write(struct io_primitive *port, const char c) {
         return uartx_write(UART_NUM_1, c);
 }
 
-static int uart2_write(const char c) {
+static int uart2_write(struct io_primitive *port, const char c) {
         return uartx_write(UART_NUM_2, c);
 }
 
-static int uart0_read(void) {
+static int uart0_read(struct io_primitive *port) {
         return uartx_read(UART_NUM_0);
 }
 
-static int uart1_read(void) {
+static int uart1_read(struct io_primitive *port) {
         return uartx_read(UART_NUM_1);
 }
 
-static int uart2_read(void) {
+static int uart2_read(struct io_primitive *port) {
         return uartx_read(UART_NUM_2);
 }
 
@@ -64,8 +64,8 @@ lexp stream_read(struct io_primitive *port);
 static lexp uart_write(struct io_typ *port, lexp exp) {
         struct io_primitive *port_primitive = port->private;
         exp = stream_write(port_primitive, exp);
-        port_primitive->write('\n');
-        port_primitive->write('\r');
+        port_primitive->write(port_primitive, '\n');
+        port_primitive->write(port_primitive, '\r');
         return exp;
 }
 
