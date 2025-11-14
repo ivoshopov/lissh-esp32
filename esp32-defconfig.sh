@@ -11,5 +11,7 @@ cd tinylisp
 sed 	-e "s/CONFIG_MAIN=y/# CONFIG_MAIN=y/" \
 	-e "s/CONFIG_DO_ELF=y/# CONFIG_DO_ELF=y/" \
 	-e "s/# CONFIG_DO_LIB=y/CONFIG_DO_LIB=y/" \
-	-e 's/CONFIG_DEFAULT_PORT="std"/CONFIG_DEFAULT_PORT="uart1"/' < defconfig > .config
+	-e "s/CONFIG_ERROR_ATOM_ID=y/CONFIG_ERROR_PRETTY=y/" \
+	-e 's/CONFIG_DEFAULT_READ_PORT="std"/CONFIG_DEFAULT_READ_PORT="espinit.lisp"/' \
+	-e 's/CONFIG_DEFAULT_WRITE_PORT="std"/CONFIG_DEFAULT_WRITE_PORT="null"/' < defconfig > .config
 make
