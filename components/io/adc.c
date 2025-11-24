@@ -74,8 +74,8 @@ static void example_adc_calibration_deinit(adc_cali_handle_t handle)
 
 #define ADC_ATTEN           ADC_ATTEN_DB_12
 
-adc_cali_handle_t adc_cali_chan_handle = NULL;
-adc_oneshot_unit_handle_t adc1_handle;
+static adc_cali_handle_t adc_cali_chan_handle = NULL;
+static adc_oneshot_unit_handle_t adc1_handle;
 static int esp_adc_init(int channel)
 {
     if (channel <= 10) {
