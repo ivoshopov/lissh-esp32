@@ -1,7 +1,6 @@
 #include <module/module.h>
 #include <io.h>
 #include <module/io/codec/text.h>
-#include "fifo.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -25,10 +24,11 @@
 QueueHandle_t xQueue;
 
 struct bt_data {
-    uint32_t connected;
+    bool connected;
+    bool congestion;
     uint32_t handle;
     QueueHandle_t *in_buff;
-} bt_io_data = { 0, 0, NULL };
+} bt_io_data = { false, false, 0, NULL };
 
 #define SPP_TAG "SPP_ACCEPTOR_DEMO"
 #define SPP_SERVER_NAME "SPP_SERVER"
@@ -92,7 +92,7 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
         case ESP_SPP_CLOSE_EVT:
             ESP_LOGI(SPP_TAG, "ESP_SPP_CLOSE_EVT status:%d handle:%"PRIu32" close_by_remote:%d", param->close.status,
                     param->close.handle, param->close.async);
-            bt_io_data.connected = 0;
+            bt_io_data.connected = false;
             break;
         case ESP_SPP_START_EVT:
             if (param->start.status == ESP_SPP_SUCCESS) {
@@ -135,17 +135,20 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
             }
             break;
         case ESP_SPP_CONG_EVT:
-            ESP_LOGI(SPP_TAG, "ESP_SPP_CONG_EVT");
+            ESP_LOGD(SPP_TAG, "ESP_SPP_CONG_EVT");
+            bt_io_data.congestion = param->cong.cong;
             break;
         case ESP_SPP_WRITE_EVT:
             ESP_LOGD(SPP_TAG, "ESP_SPP_WRITE_EVT");
+            bt_io_data.congestion = param->write.cong;
             break;
         case ESP_SPP_SRV_OPEN_EVT:
             ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_OPEN_EVT status:%d handle:%"PRIu32", rem_bda:[%s]", param->srv_open.status,
                     param->srv_open.handle, bda2str(param->srv_open.rem_bda, bda_str, sizeof(bda_str)));
             gettimeofday(&time_old, NULL);
             bt_io_data.handle = param->srv_open.handle;
-            bt_io_data.connected = 1;
+            bt_io_data.connected = true;
+            bt_io_data.congestion = false;
             break;
         case ESP_SPP_SRV_STOP_EVT:
             ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_STOP_EVT");
@@ -304,7 +307,7 @@ static int bt_read(struct io_primitive *buff) {
     struct bt_data *bt_data = (struct bt_data *)buff->private;
     unsigned char byte;
     BaseType_t xStatus;
-    if (bt_data->connected == 0)
+    if (!bt_data->connected)
         return -1;
     xStatus = xQueueReceive(*bt_data->in_buff, &byte, portMAX_DELAY);
     if (xStatus != pdPASS) {
@@ -315,8 +318,11 @@ static int bt_read(struct io_primitive *buff) {
 
 static int bt_write(struct io_primitive *buff, char c) {
     struct bt_data *bt_data = (struct bt_data *)buff->private;
-    if (bt_data->connected == 0)
+    if (!bt_data->connected)
         return -1;
+    while (bt_data->congestion)
+        vTaskDelay(1);
+    bt_data->congestion = true;
     return esp_spp_write(bt_data->handle, 1, (uint8_t*)&c);
 }
 
