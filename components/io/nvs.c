@@ -68,13 +68,22 @@ static int nvs_write(struct io_primitive *buff, char c) {
   struct nvs_typ *nvs = buff->private;
   assert(nvs != NULL);
   if (nvs->data == NULL) {
-    /* Allocate memory and fill it. This hardcoded 256 limits the size of the
-     * allowed data. */
+    /* Inital memory allocation */
     nvs->size = 256;
     nvs->data = malloc(nvs->size);
+    if (nvs->data == NULL) {
+      printf("Not enough dynamic memory\n");
+      return EOF;
+    }
   }
-  if (nvs->pos == nvs->size)
-    return EOF;
+  if (nvs->pos == nvs->size) {
+    nvs->size = nvs->size * 2;
+    nvs->data = realloc(nvs->data, nvs->size);
+    if (nvs->data == NULL) {
+      printf("Not enough dynamic memory\n");
+      return EOF;
+    }
+  }
   nvs->data[nvs->pos] = c;
   nvs->pos++;
   /* When we reach the end of the string we reset the pos pointer */
