@@ -37,6 +37,7 @@ static int nvs_read(struct io_primitive *buff) {
         err = nvs_get_blob(handle, "init-script", nvs->data, &nvs->size);
         if (err != ESP_OK) {
           free(nvs->data);
+          printf("Error while reading the blob from NVS\n");
           return EOF;
         }
       } else if (err == ESP_ERR_NVS_NOT_FOUND) {
@@ -46,9 +47,19 @@ static int nvs_read(struct io_primitive *buff) {
          * text based encoding, some day we can have binary encoding of lisp
          * expresion. */
         nvs->data = nil_buff;
+        nvs->size = sizeof(nil_buff);
       }
       nvs_close(handle);
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+      /* When the flash memory is empty we should replay with correct error
+       * message. Since there it isn't possible right now we can just return
+       * "()". It isn't perfect solution since nvs layer shouldn't relay on
+       * text based encoding, some day we can have binary encoding of lisp
+       * expresion. */
+      nvs->data = nil_buff;
+      nvs->size = sizeof(nil_buff);
     } else {
+      printf("Error while opening NVS: %s\n", esp_err_to_name(err));
       return EOF;
     }
   }
