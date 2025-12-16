@@ -62,6 +62,30 @@ void app_main(void)
     /* By default stdin is non blocking UART. Following call switch to blocking
        UART (Standard POSIX behaviour) */
     uart_vfs_dev_use_driver(1);
+#else /* CONFIG_UART1_AS_STDIO */
+    if (uart_driver_install(UART_NUM_0, 2 * 1024, 0, 0, NULL, 0) != ESP_OK) {
+      printf("UART driver installation failed");
+      goto err;
+    }
+
+
+    uart_config_t uart_config = {
+        .baud_rate = 115200,
+        .data_bits = UART_DATA_8_BITS,
+        .parity    = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_DEFAULT,
+    };
+
+    if (uart_param_config(UART_NUM_0, &uart_config) != ESP_OK) {
+      printf("UART driver configuration failed");
+      goto err;
+    }
+
+    /* By default stdin is non blocking UART. Following call switch to blocking
+       UART (Standard POSIX behaviour) */
+    uart_vfs_dev_use_driver(0);
 #endif /* CONFIG_UART1_AS_STDIO */
 
 

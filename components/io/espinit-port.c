@@ -5,13 +5,13 @@ static char init_data[] = "\
  (define begin \
   (lambda (x . args) \
    (if args (begin . args) x))) \
- (write-to! 'uart1 \
+ (write-to! 'std \
    (eval \
     (read-from! 'init-script.lisp))) \
  (loop! \
-  (write-to! 'uart1 \
+  (write-to! 'std \
    (eval \
-    (read-from! 'uart1))))";
+    (read-from! 'std))))";
 
 static struct file_typ espinit_buff = {
   .data = init_data,
