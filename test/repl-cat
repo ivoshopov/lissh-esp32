@@ -48,9 +48,9 @@ TERM_ARGS+=(-ixon)
 TERM_ARGS+=(-ixoff)
 # Disable postprocess output
 TERM_ARGS+=(-opost)
-# Disable
-# Disable
-# Disable
+# Since esp-idf monitor change the min to 0 (non-blocking mode)
+TERM_ARGS+=(min 1)
+
 stty -F $device 115200 ${TERM_ARGS[@]} -onlcr -isig -icanon -iexten -echo -echoe -echok -echoctl -echoke
 
 cleanup() {
