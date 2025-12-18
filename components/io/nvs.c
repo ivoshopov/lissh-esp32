@@ -2,6 +2,7 @@
 #include <nvs_flash.h>
 #include <io.h>
 #include <module/io/codec/text.h>
+#include <string.h>
 
 #define STORAGE_NAMESPACE "storage"
 
@@ -18,14 +19,27 @@ struct nvs_typ nvs_init_script = {
 };
 
 static char nil_buff[] = "()";
+int alloc_default_nil_buff(struct nvs_typ *nvs) {
+  /* When the flash memory is empty we should replay with correct error
+   * message. Since there it isn't possible right now we can just return
+   * "()". It isn't perfect solution since nvs layer shouldn't relay on
+   * text based encoding, some day we can have binary encoding of lisp
+   * expresion. */
+  nvs->size = sizeof(nil_buff);
+  nvs->data = malloc(nvs->size);
+  if (nvs->data == NULL)
+    return -1;
+  memcpy(nvs->data, nil_buff, nvs->size);
+  return 0;
+}
 
 /* Read a char from an NVS entry */
 static int nvs_read(struct io_primitive *buff) {
   struct nvs_typ *nvs = buff->private;
+  nvs_handle_t handle;
   assert(nvs != NULL);
   if (nvs->data == NULL) {
     /* Allocate memory and fill it */
-    nvs_handle_t handle;
     esp_err_t err;
 
     nvs->pos = 0;
@@ -37,27 +51,16 @@ static int nvs_read(struct io_primitive *buff) {
         err = nvs_get_blob(handle, "init-script", nvs->data, &nvs->size);
         if (err != ESP_OK) {
           free(nvs->data);
-          printf("Error while reading the blob from NVS\n");
-          return EOF;
+          goto err_at_get;
         }
       } else if (err == ESP_ERR_NVS_NOT_FOUND) {
-        /* When the flash memory is empty we should replay with correct error
-         * message. Since there it isn't possible right now we can just return
-         * "()". It isn't perfect solution since nvs layer shouldn't relay on
-         * text based encoding, some day we can have binary encoding of lisp
-         * expresion. */
-        nvs->data = nil_buff;
-        nvs->size = sizeof(nil_buff);
+        if (alloc_default_nil_buff(nvs) != 0)
+          goto err_at_get;
       }
       nvs_close(handle);
     } else if (err == ESP_ERR_NVS_NOT_FOUND) {
-      /* When the flash memory is empty we should replay with correct error
-       * message. Since there it isn't possible right now we can just return
-       * "()". It isn't perfect solution since nvs layer shouldn't relay on
-       * text based encoding, some day we can have binary encoding of lisp
-       * expresion. */
-      nvs->data = nil_buff;
-      nvs->size = sizeof(nil_buff);
+      if (alloc_default_nil_buff(nvs) != 0)
+        goto err;
     } else {
       printf("Error while opening NVS: %s\n", esp_err_to_name(err));
       return EOF;
@@ -71,6 +74,13 @@ static int nvs_read(struct io_primitive *buff) {
   if (c == '\0' || c == '\n')
     nvs->pos = 0;
   return c;
+
+err_at_get:
+  printf("Error while reading the blob from NVS\n");
+  nvs_close(handle);
+err:
+  printf("Error in NVS\n");
+  return EOF;
 }
 
 
